@@ -15,7 +15,7 @@
  '(custom-enabled-themes '(wombat))
  '(ns-command-modifier 'meta)
  '(package-selected-packages
-   '(flycheck magit use-package tree-sitter-langs tree-sitter go-mode exec-path-from-shell rustic lsp-mode eglot rust-mode))
+   '(magit flycheck use-package tree-sitter-langs tree-sitter go-mode exec-path-from-shell rustic lsp-mode eglot rust-mode))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -41,8 +41,15 @@
 
 
 
+(use-package rust-mode
+  :ensure t
+  :init
+  (setq rust-mode-treesitter-derive t))
+
 (use-package rustic
-  :ensure
+  :ensure t
+  :after (rust-mode)
+
   :bind (:map rustic-mode-map
               ("M-j" . lsp-ui-imenu)
               ("M-?" . lsp-find-references)
@@ -135,3 +142,9 @@ Image types are symbols like `xbm' or `jpeg'."
 
 ;; Suppress indentation with tabs: it causes havok.
 (setq-default indent-tabs-mode nil)
+
+
+;; Set up treesitter languages
+;; https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
+(setq treesit-language-source-alist
+      '((rust "https://github.com/tree-sitter/tree-sitter-rust")))
