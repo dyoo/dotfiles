@@ -1,0 +1,137 @@
+;; Turn off splash screen.
+(setq inhibit-splash-screen t)
+
+(require 'use-package)
+
+;; Make all frames default to fullheight.
+;; https://emacs.stackexchange.com/questions/2999/how-to-maximize-my-emacs-frame-on-start-up
+(add-to-list 'default-frame-alist '(fullscreen . fullheight))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(wombat))
+ '(ns-command-modifier 'meta)
+ '(package-selected-packages
+   '(flycheck magit use-package tree-sitter-langs tree-sitter go-mode exec-path-from-shell rustic lsp-mode eglot rust-mode))
+ '(tool-bar-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+;; Set font to something a little larger to see better.
+(set-face-attribute 'default nil
+                :family "Inconsolata" :height 180 :weight 'normal)
+
+
+
+;; Melpa
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+;; Uncomment to refresh package list:
+;; (package-refresh-contents)
+
+
+
+(use-package rustic
+  :ensure
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-?" . lsp-find-references)
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status))
+  :config
+  ;; uncomment for less flashiness
+  ; (setq lsp-eldoc-hook nil)
+  ; (setq lsp-enable-symbol-highlighting nil)
+  ; (setq lsp-signature-auto-activate nil)
+
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+  ;; save rust buffers that are not file visiting. Once
+  ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+  ;; no longer be necessary.
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t)
+
+  ;; Turn on flycheck
+  (flycheck-mode)
+  )
+
+(use-package lsp-mode
+  :ensure
+  :commands lsp)
+
+;; Workaround for startup bug
+;; https://emacs.stackexchange.com/questions/74289/emacs-28-2-error-in-macos-ventura-image-type-invalid-image-type-svg
+;; overriding image.el function image-type-available-p
+(defun image-type-available-p (type)
+  "Return t if image type TYPE is available.
+Image types are symbols like `xbm' or `jpeg'."
+  (if (eq 'svg type)
+      nil
+    (and (fboundp 'init-image-library)
+         (init-image-library type))))
+
+
+;; Switch between 'kinesis and 'other
+(setq my-keyboard-type
+     ; 'kinesis
+      'other
+      )
+
+(defun dyoo-mac-keyboard-setup ()
+  (interactive)
+  (setq mac-command-modifier 'meta)
+  (setq mac-control-modifier 'control)
+  (setq mac-option-modifier 'meta))
+
+(defun dyoo-mac-kinesis-keyboard-setup ()
+  (interactive)
+  (setq mac-command-modifier 'control)
+  (setq mac-control-modifier 'meta)
+  (setq mac-option-modifier 'meta))
+    
+;; Switch around mac modifier keys to make this work nicely with
+;; Kinesis keyboards under Mac layout mode.
+;; https://www.emacswiki.org/emacs/EmacsForMacOS#toc24
+(cond ((eq my-keyboard-type  'kinesis)
+       (dyoo-mac-kinesis-keyboard-setup))
+      (t (dyoo-mac-keyboard-setup)))
+
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize)
+
+  (dolist (var '("LIBTORCH" "LIBTORCH_INCLUDE"))
+    (add-to-list 'exec-path-from-shell-variables var)))
+
+
+;; Global line number mode.
+;; https://www.emacswiki.org/emacs/LineNumbers#h5o-1
+(when (version<= "26.0.50" emacs-version )
+  (add-hook 'prog-mod-hook 'display-line-number-mode))
+
+
+;; Disable control-z for sleeping - unnecessary
+(global-unset-key [(control z)])
+
+
+;; Suppress indentation with tabs: it causes havok.
+(setq-default indent-tabs-mode nil)
