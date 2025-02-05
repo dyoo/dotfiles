@@ -59,3 +59,7 @@
 (add-hook 'rust-mode-hook 'eglot-ensure)
 (setq eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider
 					  :inlayHintProvider))
+
+
+;; Disable control-z for sleeping - unnecessary
+(global-unset-key [(control z)])
