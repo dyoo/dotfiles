@@ -1,5 +1,11 @@
+; -*-Lisp-*-
+
 ;; Turn off splash screen.
 (setq inhibit-splash-screen t)
+
+
+;; Put backup saves in a separate directory so they're less annoying.
+(setq backup-directory-alist `(("." . "~/.saves")))
 
 (require 'use-package)
 
@@ -15,7 +21,7 @@
  '(custom-enabled-themes '(wombat))
  '(ns-command-modifier 'meta)
  '(package-selected-packages
-   '(magit flycheck use-package tree-sitter-langs tree-sitter go-mode exec-path-from-shell lsp-mode eglot rust-mode))
+   '(company magit flycheck use-package tree-sitter-langs tree-sitter go-mode exec-path-from-shell lsp-mode eglot rust-mode))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -57,6 +63,7 @@
 (add-hook 'rust-mode-hook
           (lambda ()
             (setq indent-tabs-mode nil)
+            (setq rust-indent-offset 2)
             (electric-indent-mode 0)))
 
 
@@ -120,3 +127,10 @@ Image types are symbols like `xbm' or `jpeg'."
 
 ;; Suppress indentation with tabs: it causes havok.
 (setq-default indent-tabs-mode nil)
+
+
+;; For company mode, turn off idle autocomplete
+(add-hook 'company-mode-hook
+          (lambda ()
+            (setq company-idle-delay nil)
+            (define-key company-mode-map (kbd "C-M-i") 'company-complete)))
