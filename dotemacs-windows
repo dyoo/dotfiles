@@ -1,6 +1,5 @@
 ; -*-Lisp-*-
 
-
 ;; Put backup saves in a separate directory so they're less annoying.
 (setq backup-directory-alist `(("." . "~/.saves")))
 
@@ -26,9 +25,8 @@
  '(default ((t (:family "Inconsolata" :foundry "PfEd" :slant normal :weight medium :height 203 :width normal)))))
 
 
-;; Treesitter languages
-(setq treesit-language-source-alist
-      '((rust "https://github.com/tree-sitter/tree-sitter-rust")))
+;; Disable control-z for sleeping - unnecessary
+(global-unset-key [(control z)])
 
 
 (require 'package)
@@ -40,8 +38,14 @@
 (package-refresh-contents)
 
 
+;; Treesitter languages
+(setq treesit-language-source-alist
+      '((rust "https://github.com/tree-sitter/tree-sitter-rust")))
+
+
 ;; Turn on kotlin mode on .kt files
 (add-to-list 'auto-mode-alist '("\\.kt\\'" . kotlin-mode))
+
 
 ;; Rust mode
 (add-hook 'rust-mode-hook
@@ -52,15 +56,11 @@
 (add-hook 'rust-mode-hook 'eglot-ensure)
 (setq eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider
 					  :inlayHintProvider))
+
 ;; Turn on eglot-booster
 (use-package eglot-booster
 	:after eglot
 	:config	(eglot-booster-mode))
-
-
-
-;; Disable control-z for sleeping - unnecessary
-(global-unset-key [(control z)])
 
 
 ;; For company mode, turn off idle autocomplete
