@@ -1,3 +1,10 @@
+; -*-Lisp-*-
+
+
+;; Put backup saves in a separate directory so they're less annoying.
+(setq backup-directory-alist `(("." . "~/.saves")))
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -5,7 +12,12 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(tango-dark))
  '(inhibit-startup-screen t)
- '(package-selected-packages '(clipetty flycheck go-mode kotlin-mode magit rust-mode)))
+ '(package-selected-packages
+   '(clipetty company eglot-booster flycheck go-mode kotlin-mode magit
+	      rust-mode))
+ '(package-vc-selected-packages
+   '((eglot-booster :vc-backend Git :url
+		    "https://github.com/jdtsmith/eglot-booster"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -59,7 +71,19 @@
 (add-hook 'rust-mode-hook 'eglot-ensure)
 (setq eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider
 					  :inlayHintProvider))
+;; Turn on eglot-booster
+(use-package eglot-booster
+	:after eglot
+	:config	(eglot-booster-mode))
+
 
 
 ;; Disable control-z for sleeping - unnecessary
 (global-unset-key [(control z)])
+
+
+;; For company mode, turn off idle autocomplete
+(add-hook 'company-mode-hook
+          (lambda ()
+            (setq company-idle-delay nil)
+            (define-key company-mode-map (kbd "C-M-i") 'company-complete)))
