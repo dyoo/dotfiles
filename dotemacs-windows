@@ -31,17 +31,6 @@
       '((rust "https://github.com/tree-sitter/tree-sitter-rust")))
 
 
-;; Trying to work around some weirdness with copy-and-paste.
-;; https://gist.github.com/yorickvP/6132f237fbc289a45c808d8d75e0e1fb
-(when (getenv "WAYLAND_DISPLAY")
-  (setq interprogram-cut-function
-	(lambda (text)
-	  (let ((p (make-process :name "wl-copy"
-				 :command '("wl-copy")
-				 :connection-type 'pipe)))
-	    (process-send-string p text)
-	    (process-send-eof p)))))
-  
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
@@ -53,14 +42,6 @@
 
 ;; Turn on kotlin mode on .kt files
 (add-to-list 'auto-mode-alist '("\\.kt\\'" . kotlin-mode))
-
-;; emacs wslg copy and paste bug workarounds
-;; https://www.lukas-barth.net/blog/emacs-wsl-copy-clipboard/
-(setq select-active-regions nil)
-(setq select-enable-clipboard 't)
-(setq select-enable-primary nil)
-(setq interprogram-cut-function #'gui-select-text)
-
 
 ;; Rust mode
 (add-hook 'rust-mode-hook
