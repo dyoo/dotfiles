@@ -18,17 +18,19 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(wombat))
+ '(custom-enabled-themes '(wheatgrass))
  '(ns-command-modifier 'meta)
  '(package-selected-packages
-   '(company magit flycheck use-package tree-sitter-langs tree-sitter go-mode exec-path-from-shell lsp-mode eglot rust-mode))
+   '(bazel company eglot exec-path-from-shell flycheck go-mode
+           kotlin-mode lsp-mode magit rust-mode tree-sitter
+           tree-sitter-langs use-package))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:family "Inconsolata" :foundry "nil" :slant normal :weight regular :height 240 :width normal)))))
 
 
 ;; Set font to something a little larger to see better.
@@ -63,7 +65,7 @@
 (add-hook 'rust-mode-hook
           (lambda ()
             (setq indent-tabs-mode nil)
-            (setq rust-indent-offset 2)
+            (setq rust-indent-offset 4)
             (electric-indent-mode 0)))
 
 
@@ -130,7 +132,31 @@ Image types are symbols like `xbm' or `jpeg'."
 
 
 ;; For company mode, turn off idle autocomplete
-(add-hook 'company-mode-hook
-          (lambda ()
-            (setq company-idle-delay nil)
-            (define-key company-mode-map (kbd "C-M-i") 'company-complete)))
+(defun my-company-mode-hook ()
+  (setq company-idle-delay nil)
+  (define-key company-mode-map (kbd "C-M-i") 'company-complete))
+(add-hook 'company-mode-hook #'my-company-mode-hook)
+
+
+
+
+;; Tidy up the a kotlin buffer
+;; Inspired by:
+;; https://emacs.stackexchange.com/questions/37045/how-to-make-shell-command-on-region-display-output-as-a-message-on-a-non-zero
+(defun tidy-kotlin ()
+  (interactive)
+  (let* ((temp-buffer (generate-new-buffer "*temp*"))
+         (beg (point-min))
+         (end (point-max))
+         (exit-status (call-shell-region beg end "ktfmt -" nil temp-buffer))
+         (output (with-current-buffer temp-buffer (buffer-string))))
+    (if (zerop exit-status)
+        (progn (delete-region beg end)
+               (insert output))
+        (message "%s" output))))
+
+;; Right before saving Kotlin files, reformat the buffer.
+(add-hook
+ 'kotlin-mode-hook
+ (lambda ()
+   (add-hook 'before-save-hook #'tidy-kotlin nil 'local)))
