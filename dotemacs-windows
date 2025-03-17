@@ -12,8 +12,8 @@
  '(custom-enabled-themes '(tango-dark))
  '(inhibit-startup-screen t)
  '(package-selected-packages
-   '(clipetty company eglot-booster flycheck go-mode kotlin-mode magit
-	      rust-mode))
+   '(bazel clipetty company eglot-booster flycheck go-mode kotlin-mode
+	   magit rust-mode))
  '(package-vc-selected-packages
    '((eglot-booster :vc-backend Git :url
 		    "https://github.com/jdtsmith/eglot-booster"))))
