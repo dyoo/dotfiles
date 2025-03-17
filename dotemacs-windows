@@ -68,3 +68,26 @@
           (lambda ()
             (setq company-idle-delay nil)
             (define-key company-mode-map (kbd "C-M-i") 'company-complete)))
+
+
+
+;; Tidy up the a kotlin buffer
+;; Inspired by:
+;; https://emacs.stackexchange.com/questions/37045/how-to-make-shell-command-on-region-display-output-as-a-message-on-a-non-zero
+(defun tidy-kotlin ()
+  (interactive)
+  (let* ((temp-buffer (generate-new-buffer "*temp*"))
+         (beg (point-min))
+         (end (point-max))
+         (exit-status (call-shell-region beg end "ktfmt -" nil temp-buffer))
+         (output (with-current-buffer temp-buffer (buffer-string))))
+    (if (zerop exit-status)
+        (progn (delete-region beg end)
+               (insert output))
+        (message "%s" output))))
+
+;; Right before saving Kotlin files, reformat the buffer.
+(add-hook
+ 'kotlin-mode-hook
+ (lambda ()
+   (add-hook 'before-save-hook #'tidy-kotlin nil 'local)))
